@@ -1,5 +1,73 @@
 #include "init.h"
 
+void *StatusCodeDef[][2] = {
+    {(void *)CONTINUEE,                         "Continue" },
+    {(void *)SWITCH_PROTOCOL,                   "Switching Protocols" },
+    {(void *)PROCESSING,                        "Processing" },
+    {(void *)EARLY_HINT,                        "Early Hints" },
+    {(void *)OK,                                "OK" },
+    {(void *)CREATED,                           "Created" },
+    {(void *)ACCEPTED,                          "Accepted" },
+    {(void *)NON_AUTHORIZED_INFO,               "Non-Authoritative Information" },
+    {(void *)NO_CONTENT,                        "No Content" },
+    {(void *)RESET_CONTENT,                     "Reset Content" },
+    {(void *)PARTIAL_CONTENT,                   "Partial Content" },
+    {(void *)MULTI_STATUS,                      "Multi-Status" },
+    {(void *)ALREADY_REPRORTED,                 "Already Reported" },
+    {(void *)IM_USED,                           "IM Used" },
+    {(void *)MULTIPLE_CHOICES,                  "Multiple Choices" },
+    {(void *)MOVED_PERMANENTLY,                 "Moved Permanently" },
+    {(void *)FOUND,                             "Found" },
+    {(void *)SEE_OTHER,                         "See Other" },
+    {(void *)NOT_MODIFIED,                      "Not Modified" },
+    {(void *)USE_PROXY,                         "Use Proxy" },
+    {(void *)SWITCH_PROXY,                      "Switch Proxy" },
+    {(void *)TEMP_REDIRECT,                     "Temporary Redirect" },
+    {(void *)PERM_REDIRECT,                     "Permanent Redirect" },
+    {(void *)BAD_REQUEST,                       "Bad Request" },
+    {(void *)UNAUTHORIZED,                      "Unauthorized" },
+    {(void *)PAYMENT_REQUIRED,                  "Payment Required" },
+    {(void *)FORBIDDEN,                         "Forbidden" },
+    {(void *)NOT_FOUND,                         "Not Found" },
+    {(void *)METHOD_NOT_ALLOWED,                "Method Not Allowed" },
+    {(void *)NOT_ACCEPTABLE,                    "Not Acceptable" },
+    {(void *)PROXY_AUTH_REQUIRED,               "Proxy Authentication Required" },
+    {(void *)REQUIRE_TIMEOUT,                   "Request Timeout" },
+    {(void *)CONFLICT,                          "Conflict" },
+    {(void *)GONE,                              "Gone" },
+    {(void *)LENGTH_REQUIRED,                   "Length Required" },
+    {(void *)PRECONDITION_FAILED,               "Precondition Failed" },
+    {(void *)PAYLOAD_TOO_LARGE,                 "Content Too Large" },
+    {(void *)URI_TOO_LONG,                      "URI Too Long" },
+    {(void *)UNSUPPORTED_MEDIA_TYPE,            "Unsupported Media Type" },
+    {(void *)RANGE_NOT_SATISFIABLE,             "Range Not Satisfiable" },
+    {(void *)EXPECTATION_FAILED,                "Expectation Failed" },
+    {(void *)IM_A_TEAPOT,                       "I'm a teapot" },
+    {(void *)MISDIRECTED_REQUEST,               "Misdirected Request" },
+    {(void *)UNPROCESSABLE_ENTITY,              "Unprocessable Content" },
+    {(void *)LOCKED,                            "Locked" },
+    {(void *)FAILED_DEPENDENCY,                 "Failed Dependency" },
+    {(void *)TOO_EARLY,                         "Too Early" },
+    {(void *)UPGRADE_REQUIRED,                  "Upgrade Required" },
+    {(void *)PROCONDITION_REQUIRED,             "Precondition Required" },
+    {(void *)TOO_MANY_REQUEST,                  "Too Many Requests" },
+    {(void *)REQ_HEADER_FIELD_TOO_LARGE,        "Request Header Fields Too Large" },
+    {(void *)UNAVAILABLE_FOR_LEGAL_REASON,      "Unavailable For Legal Reasons" },
+
+    {(void *)INTERNAL_SERVER_ERR,               "Internal Server Error" },
+    {(void *)NOT_IMPLEMENTED,                   "Not Implemented" },
+    {(void *)BAD_GATEWAY,                       "Bad Gateway" },
+    {(void *)SERVER_UNAVAILABLE,                "Service Unavailable" },
+    {(void *)GATEWAY_TIMEOUT,                   "Gateway Timeout" },
+    {(void *)HTTP_VERSION_NOT_SUPPORTED,        "HTTP Version Not Supported" },
+    {(void *)VARIANT_ALSO_NEGOTIATES,           "Variant Also Negotiates" },
+    {(void *)INSUFFICIENT_STORAGE,              "Insufficient Storage" },
+    {(void *)LOOP_DETECTED,                     "Loop Detected" },
+    {(void *)NOT_EXTENDED,                      "Not Extended" },
+    {(void *)NETWORK_AUTHENTICATION_REQUIRED,   "Network Authentication Required" },
+    NULL
+};
+
 cws_t init_ws(char *ip, int port)
 {
 	if(!port)
@@ -79,13 +147,14 @@ int add_route(cws_t web, char *name, void *handler, int req_info, int headers)
 	return 1;
 }
 
-char *sock_get_client_ip(int sock, struct sockaddr_in *client) {
-    int sz = sizeof(*client);
-    if(getpeername(sock, (struct sockaddr *)client, &sz) != 0)
+char *sock_get_client_ip(int sock) {
+    struct sockaddr_in client;
+    int sz = sizeof(client);
+    if(getpeername(sock, (struct sockaddr *)&client, &sz) != 0)
         return NULL;
 
     char ip[INET_ADDRSTRLEN] = {0};
-    inet_ntop(AF_INET, &(client->sin_addr), ip, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(client.sin_addr), ip, INET_ADDRSTRLEN);
 
 	char *n = strdup(ip);
 	if(!n)
@@ -126,8 +195,15 @@ void run_server(cws_t web, int buff_len)
 				if(lines) free_arr((void *)lines);
 				continue;
 			}
-			printf("%s\n", buffer);
+
 			char **args = __split(buffer, " ", &arg_c);
+            if(arg_c == 0)
+			{
+				close(sock);
+				free_arr((void *)lines);
+				continue;
+			}
+
 			int pos = find_route(web, args[1]);
 			if(pos == -1)
 			{
@@ -145,7 +221,10 @@ void run_server(cws_t web, int buff_len)
 				free_arr((void *)lines);
 				continue;
 			}
-		}
+		} else {
+
+        }
+
 		buffer[bytes] = '\0';
 		close(sock);
 	}

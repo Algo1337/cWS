@@ -33,6 +33,7 @@ map_t create_map(int len, char *buff[restrict len][2])
 		}
 	}
 
+    map[idx] = NULL;
 	if(idx == 0)
 	{
 		free(map);

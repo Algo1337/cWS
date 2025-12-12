@@ -6,4 +6,4 @@ compile:
 	gcc main.c src/*.c
 
 debug:
-	gcc main.c src/*.c -g -g3 -ggdb
+	gcc main.c src/*.c -g -g3 -ggdb -fsanitize=address

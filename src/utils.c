@@ -84,7 +84,8 @@ char **__split(char *buffer, char *delim, int *idx)
     {
         int len = strlen(token);
 
-        arr[*idx] = malloc(len + 1);
+        if(!(arr[*idx] = malloc(len + 1)))
+            printf("Malloc err\n");
         memcpy(arr[*idx], token, len + 1);
 
         (*idx)++;
