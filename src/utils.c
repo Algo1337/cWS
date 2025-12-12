@@ -1,5 +1,39 @@
 #include "init.h"
 
+char *read_file_content(char *filename)
+{
+	if(!filename)
+		return NULL;
+
+	FILE *stream = fopen(filename, "r");
+	if(!stream)
+		return NULL;
+
+	fseek(stream, 0, SEEK_END);
+	int sz = ftell(stream);
+	fseek(stream, 0, SEEK_SET);
+
+	char *data = (char *)malloc(sz + 1);
+	if(!data)
+	{
+		printf("Malloc err\n");
+		fclose(stream);
+		return NULL;
+	}
+
+	int bytes = fread(data, 1, sz, stream);
+	data[bytes] = '\0';
+	fclose(stream);
+
+	if(bytes == 0)
+	{
+		free(data);
+		return NULL;
+	}
+
+	return data;
+}
+
 void *to_heap(void *p, int size)
 {
 	void *ptr = malloc(size);
@@ -66,4 +100,12 @@ char **__split(char *buffer, char *delim, int *idx)
     free(copy);
     arr[*idx] = NULL;
     return arr;
+}
+
+void struct_Destructor(void *ptr, void *(*destructor)())
+{
+    if(destructor)
+        destructor(ptr);
+
+    free(ptr);
 }

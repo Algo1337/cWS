@@ -60,7 +60,7 @@ int find_route(cws_t web, char *name)
 	return -1;
 }
 
-int add_route(cws_t web, char *name, void *handler)
+int add_route(cws_t web, char *name, void *handler, int req_info, int headers)
 {
 	if(!web || !handler)
 		return 0;
@@ -68,6 +68,8 @@ int add_route(cws_t web, char *name, void *handler)
 	_route *route = (_route *)malloc(sizeof(_route));
 	route->name = strdup(name);
 	route->handler = handler;
+	route->parse_status_code = req_info;
+	route->parse_headers = headers;
 
 	web->routes[web->route_count++] = route;
 	if(!(web->routes = (_route **)realloc(web->routes, sizeof(_route *) * (web->route_count + 1))))
@@ -75,6 +77,21 @@ int add_route(cws_t web, char *name, void *handler)
 
 	web->routes[web->route_count] = NULL;
 	return 1;
+}
+
+char *sock_get_client_ip(int sock, struct sockaddr_in *client) {
+    int sz = sizeof(*client);
+    if(getpeername(sock, (struct sockaddr *)client, &sz) != 0)
+        return NULL;
+
+    char ip[INET_ADDRSTRLEN] = {0};
+    inet_ntop(AF_INET, &(client->sin_addr), ip, INET_ADDRSTRLEN);
+
+	char *n = strdup(ip);
+	if(!n)
+		return NULL;
+
+	return n;
 }
 
 void run_server(cws_t web, int buff_len)
@@ -98,7 +115,39 @@ void run_server(cws_t web, int buff_len)
 			close(sock);
 			continue;
 		}
+
+		if(strstr(buffer, "GET") || strstr(buffer, "POST"))
+		{
+			int arg_c;
+			char **lines = __split(buffer, "\n", &arg_c);
+			if(arg_c == 0)
+			{
+				close(sock);
+				if(lines) free_arr((void *)lines);
+				continue;
+			}
+			printf("%s\n", buffer);
+			char **args = __split(buffer, " ", &arg_c);
+			int pos = find_route(web, args[1]);
+			if(pos == -1)
+			{
+				close(sock);
+				free_arr((void *)args);
+				free_arr((void *)lines);
+				continue;
+			}
+
+			int status = web->routes[pos]->handler(sock);
+			if(!status)
+			{
+				close(sock);
+				free_arr((void *)args);
+				free_arr((void *)lines);
+				continue;
+			}
+		}
 		buffer[bytes] = '\0';
 		close(sock);
 	}
 }
+

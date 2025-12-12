@@ -2,14 +2,27 @@
 
 map_t create_map(int len, char *buff[restrict len][2])
 {
-	map_t map = (map_t)malloc(sizeof(_key *));
-	int idx = 0;
+    if(len <= 0 || !buff)
+        return NULL;
 
+	map_t map = (map_t)malloc(sizeof(_key *));
+    if(!map)
+    {
+        printf("Malloc err\n");
+        return NULL;
+    }
+
+	int idx = 0;
 	for(int i = 0; i < len; i++)
 	{
 		_key *field = (_key *)malloc(sizeof(_key));
+        if(!field)
+        {
+            printf("Malloc err\n");
+            break;
+        }
 		field->key = strdup(buff[i][0]);
-		field->value = strdup(buff[i][0]);
+		field->value = strdup(buff[i][1]);
 
 		map[idx++] = field;
 		map = (map_t)realloc(map, sizeof(_key *) * (idx + 1));
@@ -29,6 +42,20 @@ map_t create_map(int len, char *buff[restrict len][2])
 	return map;
 }
 
+char **parse_req_info(char *data)
+{
+    if(!data)
+        return NULL;
+
+    int line_count = 0;
+    char **lines = __split(data, "\n", &line_count);
+
+    char **args = __split(lines[0], " ", &line_count);
+    free_arr((void *)lines);
+    
+    return args;
+}
+
 map_t parse_headers(char *data)
 {
 	if(!data)
@@ -38,7 +65,7 @@ map_t parse_headers(char *data)
 	int idx = 0, line_count;
 	char **lines = __split(data, "\n", &line_count);
 
-	for(int i = 0; i < line_count; i++)
+	for(int i = 1; i < line_count; i++)
 	{
 		if(!lines[i])
 			break;
