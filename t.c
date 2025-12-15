@@ -1,6 +1,5 @@
 #include "src/init.h"
 
-
 int main()
 {
 	int len = 2;

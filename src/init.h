@@ -129,8 +129,14 @@ typedef struct
 // Don't know if i wanna use this yet
 typedef struct
 {
-
+	int 		status_code;
+	int 		path;
+	int 		http_version;
+	map_t 		headers;
+	map_t 		post_data;
 } _cwr;
+
+typedef _cwr *cwr_t;
 
 /* cWebserver */
 typedef struct
@@ -167,6 +173,6 @@ void 	*to_heap(void *p, int size);
 void 	free_arr(void **arr);
 int 	trim_idx(char *buffer, int index);
 char 	**__split(char *buffer, char *delim, int *idx);
-char 	*read_file_content(char *filename);
+char 	*read_file_content(char *filename, int *length);
 
 #endif

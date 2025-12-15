@@ -1,6 +1,6 @@
 #include "init.h"
 
-char *read_file_content(char *filename)
+char *read_file_content(char *filename, int *length)
 {
 	if(!filename)
 		return NULL;
@@ -24,6 +24,8 @@ char *read_file_content(char *filename)
 	int bytes = fread(data, 1, sz, stream);
 	data[bytes] = '\0';
 	fclose(stream);
+
+	*length = bytes;
 
 	if(bytes == 0)
 	{

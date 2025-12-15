@@ -172,7 +172,6 @@ void run_server(cws_t web, int buff_len)
 	int sz = sizeof(client);
 	while(1)
 	{
-		printf("Listening for new connection...!\n");
 		int sock = accept(web->socket, (struct sockaddr *)&client, &sz);
 		if(sock <= 0)
 			continue;
@@ -204,6 +203,7 @@ void run_server(cws_t web, int buff_len)
 				continue;
 			}
 
+			printf("[ HANDLER ]: %s\n", args[1]);
 			int pos = find_route(web, args[1]);
 			if(pos == -1)
 			{
@@ -213,7 +213,7 @@ void run_server(cws_t web, int buff_len)
 				continue;
 			}
 
-			int status = web->routes[pos]->handler(sock);
+			int status = web->routes[pos]->handler(sock, buffer);
 			if(!status)
 			{
 				close(sock);
@@ -221,6 +221,9 @@ void run_server(cws_t web, int buff_len)
 				free_arr((void *)lines);
 				continue;
 			}
+
+			free_arr((void *)args);
+			free_arr((void *)lines);
 		} else {
 
         }
@@ -229,4 +232,3 @@ void run_server(cws_t web, int buff_len)
 		close(sock);
 	}
 }
-

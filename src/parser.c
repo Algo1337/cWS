@@ -31,6 +31,8 @@ map_t create_map(int len, char *buff[restrict len][2])
 			printf("Realloc err\n");
 			break;
 		}
+
+		map[idx] = NULL;
 	}
 
     map[idx] = NULL;
@@ -72,6 +74,7 @@ map_t parse_headers(char *data)
 			break;
 
 		if(lines[i][0] == ' ') break;
+		if(!strstr(lines[i], ":")) break;
 
 		int arg_c;
 		char **args = __split(lines[i], " ", &arg_c);
@@ -88,8 +91,11 @@ map_t parse_headers(char *data)
 		map = (_key **)realloc(map, sizeof(_key *) * (idx + 1));
 		if(!map)
 			printf("[ x ] Error, Unable to realloc...!\n");
+
+		map[idx] = NULL;
 	}
 
+	map[idx] = NULL;
 	if(idx == 0)
 	{
 		free(map);

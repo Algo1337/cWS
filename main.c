@@ -1,41 +1,17 @@
 #include "src/init.h"
 
-typedef struct
-{
-	char **ips;
-	int idx;
-} _prot;
-
-typedef _prot *prot_t;
-
-prot_t protection = NULL;
-
-int is_ip_blocked(prot_t protection, char *ip)
-{
-	if(!protection)
-		return -1;
-
-	for(int i = 0; i < protection->idx; i++)
-	{
-		if(!strcmp(protection->ips[i], ip))
-			return i;
-	}
-
-	return -1;
-}
-
 const char *PRE_SET_HEADER = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nConnection: close\r\nContent-Length: %d\r\n";
 
-int send_response(int sock, int status_code, int header_len, map_t headers, char *body)
+int send_response(int sock, int status_code, map_t headers, char *body)
 {
-	char data[1024 * 3];
-
 	int body_len = strlen(body);
+	char data[strlen(PRE_SET_HEADER) + body_len * 2];
+
 	sprintf(data, PRE_SET_HEADER, body_len);
 
 	if(headers)
 	{
-		for(int i = 0; i < header_len; i++)
+		for(int i = 0; headers[i] != NULL; i++)
 		{
 			_key *field = headers[i];
 
@@ -49,25 +25,75 @@ int send_response(int sock, int status_code, int header_len, map_t headers, char
 	strcat(data, "\r\n");
 	strcat(data, body);
 	strcat(data, "\r\n\r\n");
-	
+
 	int len = strlen(data);
 	write(sock, data, len);
 
 	return 1;
 }
 
+int send_web_file(int sock, int status_code, map_t headers, char *web_file)
+{
+    int length = 0;
+    char *file_content = read_file_content(web_file, &length);
+
+    int ret = send_response(sock, status_code, headers, file_content);
+	free(file_content);
+
+	return ret;
+}
+
+map_t parse_post_request(cwr_t req, char *data)
+{
+	if(!req || !data)
+		return NULL;
+
+	int line_c = 0, arg_c = 0;
+	char **lines = __split(data, "\n", &line_c);
+	char *line = lines[line_c - 1];
+
+	if(strstr(line, "&"))
+	{
+		char **params = __split(line, "&", &arg_c);
+		map_t map = (map_t)malloc(sizeof(_key *));
+
+		for(int i = 0; i < arg_c; i++) {
+			if(!params[i]) break;
+
+			int args_c = 0;
+			char **args = __split(params[i], "=", &args_c);
+			map[i] = (_key *)malloc(sizeof(_key *));
+			map[i]->key = strdup(args[0]);
+			map[i]->value = strdup(args[1]);
+
+			map = (map_t)realloc(map, sizeof(_key *) * (i + 1));
+			map[i + 1] = NULL;
+		}
+
+		return map;
+	}
+
+
+	return NULL;
+}
+
 handler_t middle_ware(int sock)
 {
-	char *ip = sock_get_client_ip(sock);
-	if(!is_ip_blocked(protection, ip)) {
-		printf("[ REQ_ATTEMP] IP Is Blocked: %s\n", ip);
-		return 0;
-	}
+	return 1;
+}
+
+handler_t mobile_handler(int sock)
+{
+	int length = 0;
+	char *file_content = read_file_content("frontend/mobile.html", &length);
+
+	send_response(sock, 200, NULL, file_content);
+	free(file_content);
 
 	return 1;
 }
 
-handler_t handler(int sock, char *buffer)
+handler_t index_handler(int sock, cwr_t req, char *buffer)
 {
 	char *n[][2] = {
 		{"TEST", "NIG"},
@@ -75,28 +101,30 @@ handler_t handler(int sock, char *buffer)
 		NULL
 	};
 
-	map_t headers = create_map(1, n);
-	if(!headers)
-	{
-		printf("Error\n");
-		return 1;
-	}
+//	map_t headers = create_map(2, n);
+//	if(!headers)
+//	{
+//		printf("Error\n");
+//		return 1;
+//	}
+
+	char *ip = sock_get_client_ip(sock);
+	printf("USER_IP: %s\n", ip);
 
 	/* Parse Headers */
-	//map_t headers = parse_headers(buffer);
-	char *file_content = read_file_content("frontend/index.html");
-	int length = strlen(file_content);
-	send_response(sock, 200, 1, headers, file_content);
 
-	free(file_content);
+	map_t headers = parse_headers(buffer);
+	for(int i = 0; headers[i] != NULL; i++)
+	{
+		printf("%s -> %s\n", headers[i]->key, headers[i]->value);
+	}
+
+	send_web_file(sock, 200, NULL, "frontend/index.html");
 	return 1;
 }
 
 int main()
 {
-	protection = malloc(sizeof(_prot));
-	protection->ips = malloc(sizeof(char *));
-	protection->idx = 0;
 	cws_t web = init_ws("192.168.1.88", 80);
 	if(!web)
 	{
@@ -104,7 +132,8 @@ int main()
 		return 1;
 	}
 
-	add_route(web, "/", handler, 1, 1);
+	add_route(web, "/", index_handler, 1, 1);
+	add_route(web, "/mobile", mobile_handler, 1, 1);
 	run_server(web, 1024);
 	return 0;
 }

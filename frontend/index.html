@@ -1,49 +1,113 @@
 <html>
 <head>
-	<title>Hello World</title>
+	<title>Algo1337</title>
+	<meta property="og:title" content="Algo1337">
+    <meta property="og:description" content="Read about algo">
+    <meta property="og:url" content="https://home.insanity.host/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images-ext-1.discordapp.net/external/v72E4SBVvInirD5wy3cfN4aQfot8aw7Xpy4mceRwaTM/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1440844781218431029/e586fd075fd0665289bc23ea53ed0626.png?format=webp&quality=lossless">
 </head>
 
 <style>
 	body {
 		background-color: #000;
 		color: #fff;
+		height: 100%;
+		margin: 0;
 	}
 
 	.nav {
-		position: absolute;
-		margin: auto;
+		position: fixed;
 		top: 0%;
 		left: 0%;
-		height: 70px;
+		height: 75px;
 		width: 100%;
-		background-color: #740000;
+		background-color: #000;
+		border-bottom: 2px solid #740000;
+		border-bottom-left-radius: 15px;
+		border-bottom-right-radius: 15px;
 	}
 
 	.title {
 		position: absolute;
 		margin: auto;
-		top: 20px;
+		top: 25px;
 		margin-left: 10px;
 		color: #fff;
+		text-shadow:
+		  -2px -2px 0 #740000,
+		   2px -2px 0 #740000,
+		  -2px  2px 0 #740000,
+		   2px  2px 0 #740000,
+		  -2px  0   0 #740000,
+		   2px  0   0 #740000,
+		   0   -2px 0 #740000,
+		   0    2px 0 #740000;
 	}
 
 	.space {
 		margin-top: 20px;
-		margin-left: 150px;
+		margin-left: 125px;
 	}
 	
 	.nav_btn {
-		margin-top: 2px;
-		background-color: #740000;
+		background-color: #000;
+		min-width: 100px;
 		width: 150px;
-		height: 20px;
-		border: 2px solid #fff;
+		height: 30px;
+		border: 2px solid #740000;
 		border-radius: 15px;
-		box-shadow: 10px 10px 1px #0e0101;
-		padding: 2px;
+		box-shadow: 10px 10px 18px #181818;
 		display: inline-block;
 		text-align: center;
 		margin-left: 10px;
+	}
+
+	.btn_txt {
+		margin-top: 5px;
+		color: #fff;
+	}
+	
+	.body_box {
+		position: absolute;
+		top: 125px;
+		left: 10%;
+		width: 80%;
+		height: calc(100vh - 175px);
+		border: 3px solid #740000;
+		border-radius: 15px;
+		box-shadow: 8px 8px 20px #181818;
+	}
+
+	.center_title_box {
+		background-color: #000;
+		padding-top: 8px;
+		color: #fff;
+		font-size: 22;
+		text-align: center;
+		margin-top: 3px;
+		margin-left: 2px;
+		width: 99%;
+		height: 35px;
+		border-bottom: 3px solid #740000;
+		border-bottom-left-radius: 13px;
+		border-bottom-right-radius: 13px;
+	}
+
+	.row {
+		margin: 5px;
+	}
+
+	.row_item {
+		width: calc(99% - 50%);
+		height: 10px;
+		display: inline-block;
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	.img_itm {
+		width: 100%;
 	}
 </style>
 
@@ -51,9 +115,29 @@
 	<div class="nav">
 		<h2 class=title>Algo1337</h2>
 		<div class="space">
-		<div class="nav_btn">Home</div>
-		<div class="nav_btn">About Me</div>
-		<div class="nav_btn">Contact</div>
+		<div class="nav_btn">
+			<div class="btn_txt">
+				<a href="/" style="text-decoration: none; color: #fff">Home</a>
+			</div>
+		</div>
+		<div class="nav_btn">
+			<div class="btn_txt">
+				<a href="https://github.com/algo1337" style="text-decoration: none; color: #fff">Github</a>
+			</div>
+		</div>
+	</div>
+	<div class="body_box">
+		<div class="center_title_box">
+			Projects
+		</div>
+		<div class="row">
+			<div class="row_item">
+				<img class="img_itm" src="https://media.discordapp.net/attachments/1443351585945292992/1449479527888846989/output-onlinepngtools.png?ex=693f0c81&is=693dbb01&hm=ccb84c5d162db6d3b50e23ebfcb3159d21d8ed5fc37cadac1660b969677ba316&=&format=webp&quality=lossless">
+			</div>
+			<div class="row_item">
+				<h2> Agriculture Technology Research and Innovation Foundation</h2>
+				<p>An organization focused on agriculture technology research to innovate useful equipment at an affordable cost and deliver to farmers across the world!</p>
+			</div>
 		</div>
 	</div>
 </body>
