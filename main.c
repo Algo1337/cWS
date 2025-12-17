@@ -82,7 +82,7 @@ handler_t middle_ware(int sock)
 	return 1;
 }
 
-handler_t mobile_handler(int sock)
+handler_t mobile_handler(int sock, cwr_t req)
 {
 	int length = 0;
 	char *file_content = read_file_content("frontend/mobile.html", &length);
@@ -93,13 +93,14 @@ handler_t mobile_handler(int sock)
 	return 1;
 }
 
-handler_t index_handler(int sock, cwr_t req, char *buffer)
+handler_t index_handler(int sock, cwr_t req)
 {
 	char *n[][2] = {
 		{"TEST", "NIG"},
 		{"NIG", "TEST"},
 		NULL
 	};
+	printf("%s\n", req->body);
 
 //	map_t headers = create_map(2, n);
 //	if(!headers)
@@ -113,7 +114,7 @@ handler_t index_handler(int sock, cwr_t req, char *buffer)
 
 	/* Parse Headers */
 
-	map_t headers = parse_headers(buffer);
+	map_t headers = parse_headers(req->body);
 	for(int i = 0; headers[i] != NULL; i++)
 	{
 		printf("%s -> %s\n", headers[i]->key, headers[i]->value);

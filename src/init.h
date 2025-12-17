@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 #include <unistd.h>
 #include <signal.h> //
 #include <pthread.h>
@@ -18,7 +17,14 @@
 
 typedef int (handler_t);
 
-typedef enum StatusCode {
+typedef enum {
+    _NONE = 0,
+    _GET = 1,
+    _POST = 2,
+    _HEAD = 3,
+} req_t;
+
+typedef enum {
     CONTINUEE                       = 100,
     SWITCH_PROTOCOL                 = 101,
     PROCESSING                      = 102,
@@ -126,14 +132,15 @@ typedef struct
 } _route;
 
 /* cWebRequest */
-// Don't know if i wanna use this yet
 typedef struct
 {
+    req_t       req_type;
 	int 		status_code;
 	int 		path;
 	int 		http_version;
 	map_t 		headers;
 	map_t 		post_data;
+    char        *body;
 } _cwr;
 
 typedef _cwr *cwr_t;

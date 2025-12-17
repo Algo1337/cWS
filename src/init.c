@@ -184,7 +184,7 @@ void run_server(cws_t web, int buff_len)
 			continue;
 		}
 
-		if(strstr(buffer, "GET") || strstr(buffer, "POST"))
+		if(strstr(buffer, "GET") || strstr(buffer, "POST") || strstr(buffer, "HEAD"))
 		{
 			int arg_c;
 			char **lines = __split(buffer, "\n", &arg_c);
@@ -195,13 +195,19 @@ void run_server(cws_t web, int buff_len)
 				continue;
 			}
 
-			char **args = __split(buffer, " ", &arg_c);
+			char **args = __split(lines[0], " ", &arg_c);
             if(arg_c == 0)
 			{
 				close(sock);
 				free_arr((void *)lines);
 				continue;
 			}
+
+            cwr_t req = (cwr_t)malloc(sizeof(_cwr));
+            req->req_type = strdup(args[0]);
+            req->path = strdup(args[1]);
+            req->http_version = strdup(args[2]);
+            req->body = strdup(buffer);
 
 			printf("[ HANDLER ]: %s\n", args[1]);
 			int pos = find_route(web, args[1]);
@@ -213,7 +219,7 @@ void run_server(cws_t web, int buff_len)
 				continue;
 			}
 
-			int status = web->routes[pos]->handler(sock, buffer);
+			int status = web->routes[pos]->handler(sock, req);
 			if(!status)
 			{
 				close(sock);
