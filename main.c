@@ -43,40 +43,6 @@ int send_web_file(int sock, int status_code, map_t headers, char *web_file)
 	return ret;
 }
 
-map_t parse_post_request(cwr_t req, char *data)
-{
-	if(!req || !data)
-		return NULL;
-
-	int line_c = 0, arg_c = 0;
-	char **lines = __split(data, "\n", &line_c);
-	char *line = lines[line_c - 1];
-
-	if(strstr(line, "&"))
-	{
-		char **params = __split(line, "&", &arg_c);
-		map_t map = (map_t)malloc(sizeof(_key *));
-
-		for(int i = 0; i < arg_c; i++) {
-			if(!params[i]) break;
-
-			int args_c = 0;
-			char **args = __split(params[i], "=", &args_c);
-			map[i] = (_key *)malloc(sizeof(_key *));
-			map[i]->key = strdup(args[0]);
-			map[i]->value = strdup(args[1]);
-
-			map = (map_t)realloc(map, sizeof(_key *) * (i + 1));
-			map[i + 1] = NULL;
-		}
-
-		return map;
-	}
-
-
-	return NULL;
-}
-
 handler_t middle_ware(int sock)
 {
 	return 1;
@@ -100,7 +66,7 @@ handler_t index_handler(int sock, cwr_t req)
 		{"NIG", "TEST"},
 		NULL
 	};
-	printf("%s\n", req->body);
+	printf("%s\n", req->content);
 
 //	map_t headers = create_map(2, n);
 //	if(!headers)
@@ -114,7 +80,7 @@ handler_t index_handler(int sock, cwr_t req)
 
 	/* Parse Headers */
 
-	map_t headers = parse_headers(req->body);
+	map_t headers = parse_headers(req);
 	for(int i = 0; headers[i] != NULL; i++)
 	{
 		printf("%s -> %s\n", headers[i]->key, headers[i]->value);

@@ -1,6 +1,6 @@
 #include "init.h"
 
-void *StatusCodeDef[][2] = {
+const void *StatusCodeDef[STATUS_CODE_COUNT][2] = {
     {(void *)CONTINUEE,                         "Continue" },
     {(void *)SWITCH_PROTOCOL,                   "Switching Protocols" },
     {(void *)PROCESSING,                        "Processing" },
@@ -65,7 +65,7 @@ void *StatusCodeDef[][2] = {
     {(void *)LOOP_DETECTED,                     "Loop Detected" },
     {(void *)NOT_EXTENDED,                      "Not Extended" },
     {(void *)NETWORK_AUTHENTICATION_REQUIRED,   "Network Authentication Required" },
-    NULL
+    {NULL, NULL}
 };
 
 cws_t init_ws(char *ip, int port)
@@ -191,7 +191,6 @@ void run_server(cws_t web, int buff_len)
 			if(arg_c == 0)
 			{
 				close(sock);
-				if(lines) free_arr((void *)lines);
 				continue;
 			}
 
@@ -204,32 +203,28 @@ void run_server(cws_t web, int buff_len)
 			}
 
             cwr_t req = (cwr_t)malloc(sizeof(_cwr));
+            req->lines = lines;
             req->req_type = (!strcmp(args[0], "GET") ? _GET : !strcmp(args[0], "POST") ? _POST : _HEAD);
             req->path = strdup(args[1]);
             req->http_version = strdup(args[2]);
-            req->body = strdup(buffer);
+            req->content = strdup(buffer);
 
 			printf("[ HANDLER ]: %s\n", args[1]);
 			int pos = find_route(web, args[1]);
 			if(pos == -1)
 			{
-				close(sock);
-				free_arr((void *)args);
-				free_arr((void *)lines);
+                req_Destruct(req);
 				continue;
 			}
 
 			int status = web->routes[pos]->handler(sock, req);
 			if(!status)
 			{
-				close(sock);
-				free_arr((void *)args);
-				free_arr((void *)lines);
+                req_Destruct(req);
 				continue;
 			}
 
-			free_arr((void *)args);
-			free_arr((void *)lines);
+            req_Destruct(req);
 		} else {
 
         }
@@ -237,4 +232,30 @@ void run_server(cws_t web, int buff_len)
 		buffer[bytes] = '\0';
 		close(sock);
 	}
+}
+
+void req_Destruct(cwr_t req)
+{
+    if(req->sock > 0)
+        close(req->sock);
+
+    if(req->path)
+        free(req->path);
+
+    if(req->http_version)
+        free(req->http_version);
+
+    if(req->headers)
+        map_Destruct(req->headers);
+
+    if(req->post)
+        map_Destruct(req->post);
+
+    if(req->content)
+        free(req->content);
+
+    if(req->lines)
+        free_arr((void *)req->lines);
+
+    free(req);
 }

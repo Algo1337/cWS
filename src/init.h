@@ -94,8 +94,8 @@ typedef enum {
     NETWORK_AUTHENTICATION_REQUIRED = 511
 } StatusCode;
 
-#define STATUS_CODE_COUNT 63
-extern void *StatusCodeDef[][2];
+#define STATUS_CODE_COUNT 64
+extern const void *StatusCodeDef[STATUS_CODE_COUNT][2];
 
 typedef enum
 {
@@ -134,13 +134,18 @@ typedef struct
 /* cWebRequest */
 typedef struct
 {
+    int         sock;
     req_t       req_type;
 	int 		status_code;
 	char        *path;
 	char 		*http_version;
+
 	map_t 		headers;
-	map_t 		post_data;
-    char        *body;
+	map_t 		post;
+
+    char        *content;
+    char        **lines;
+    int         body_line;
 } _cwr;
 
 typedef _cwr *cwr_t;
@@ -169,11 +174,12 @@ int 	find_route(cws_t web, char *name);
 int 	add_route(cws_t web, char *name, void *handler, int req_info, int headers);
 char    *sock_get_client_ip(int sock);
 void 	run_server(cws_t web, int buff_len);
+void    req_Destruct(cwr_t req);
 
 // parser.c
 map_t 	create_map(int len, char *buff[restrict len][2]);
-map_t 	parse_headers(char *data);
-char 	**parse_req_info(char *data);
+map_t 	parse_headers(cwr_t req);
+char 	**parse_req_info(cwr_t req);
 
 // utils.c
 void 	*to_heap(void *p, int size);
@@ -181,5 +187,6 @@ void 	free_arr(void **arr);
 int 	trim_idx(char *buffer, int index);
 char 	**__split(char *buffer, char *delim, int *idx);
 char 	*read_file_content(char *filename, int *length);
-
+void    field_Destruct(_key *q);
+void    map_Destruct(map_t map);
 #endif

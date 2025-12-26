@@ -100,6 +100,13 @@ char **__split(char *buffer, char *delim, int *idx)
 
     }
 
+	if(*idx == 0)
+	{
+		free(copy);
+		free(arr);
+		return NULL;
+	}
+
     free(copy);
     arr[*idx] = NULL;
     return arr;
@@ -111,4 +118,23 @@ void struct_Destructor(void *ptr, void *(*destructor)())
         destructor(ptr);
 
     free(ptr);
+}
+
+void field_Destruct(_key *q) 
+{
+	if(q->key)
+		free(q->key);
+
+	if(q->value)
+		free(q->value);
+
+	free(q);
+}
+
+void map_Destruct(map_t map)
+{
+	for(int i = 0; map[i] != NULL; i++)
+		field_Destruct(map[i]);
+
+	free(map);
 }
