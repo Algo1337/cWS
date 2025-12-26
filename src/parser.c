@@ -1,4 +1,4 @@
-#include "init.h"
+#include "init.h"  
 
 map_t create_map(int len, char *buff[restrict len][2])
 {

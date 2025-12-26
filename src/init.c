@@ -204,7 +204,7 @@ void run_server(cws_t web, int buff_len)
 			}
 
             cwr_t req = (cwr_t)malloc(sizeof(_cwr));
-            req->req_type = strdup(args[0]);
+            req->req_type = (!strcmp(args[0], "GET") ? _GET : !strcmp(args[0], "POST") ? _POST : _HEAD);
             req->path = strdup(args[1]);
             req->http_version = strdup(args[2]);
             req->body = strdup(buffer);

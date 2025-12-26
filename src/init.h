@@ -136,8 +136,8 @@ typedef struct
 {
     req_t       req_type;
 	int 		status_code;
-	int 		path;
-	int 		http_version;
+	char        *path;
+	char 		*http_version;
 	map_t 		headers;
 	map_t 		post_data;
     char        *body;
